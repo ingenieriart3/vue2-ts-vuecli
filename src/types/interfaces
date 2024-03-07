@@ -1,0 +1,210 @@
+// podriamos decir una forma de manejar data types y su uso en firmas (sean constructores de clase, metodos o funciones)
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+ 
+function createSquare(config: SquareConfig): { color: string; area: number } {
+  return {
+    color: config.color || "red",
+    area: config.width ? config.width * config.width : 20,
+  };
+}
+ 
+// let mySquare = createSquare({ colour: "red", width: 100 });
+
+let mySquare = createSquare({ width: 100, opacity: 0.5 } as SquareConfig);
+
+
+interface SearchFunc {
+    (source: string, subString: string): boolean;
+  }
+//   Try
+  
+//   Once defined, we can use this function type interface like we would other interfaces. Here, we show how you can create a variable of a function type and assign it a function value of the same type.
+  
+  let mySearch: SearchFunc;
+   
+  mySearch = function (source: string, subString: string): boolean {
+    let result = source.search(subString);
+    return result > -1;
+  };
+
+  
+  mySearch = function (src, sub) {
+    // Type '(src: string, sub: string) => string' is not assignable to type 'SearchFunc'.
+    // Type 'string' is not assignable to type 'boolean'.
+    
+      let result = src.search(sub);
+      return "string";
+    };
+
+    // Indexable Types
+
+    // Similarly to how we can use interfaces to describe function types, we can also describe types that we can “index into” like a[10], or ageMap["daniel"]. Indexable types have an index signature that describes the types we can use to index into the object, along with the corresponding return types when indexing.
+    
+    // Let’s take an example:
+    
+    interface StringArray {
+      [index: number]: string;
+    }
+     
+    let myArray: StringArray;
+    myArray = ["Bob", "Fred"];
+     
+    let myStr: string = myArray[0];
+
+
+
+    interface Animal {
+        name: string;
+    }
+    
+    interface Dog extends Animal {
+        breed: string;
+    }
+    
+    // Error: indexing with a numeric string might get you a completely separate type of Animal!
+    interface NotOkay {
+        [x: number]: Animal;
+//   'number' index type 'Animal' is not assignable to 'string' index type 'Dog'.
+    
+    [x: string]: Dog;
+    }
+
+
+
+    interface NumberDictionary {
+        [index: string]: number;
+        
+        length: number; // ok, length is a number
+        name: string; // error, the type of 'name' is not a subtype of the indexer
+    //   Property 'name' of type 'string' is not assignable to 'string' index type 'number'.    
+    }
+
+
+    interface NumberOrStringDictionary {
+        [index: string]: number | string;
+        
+        length: number; // ok, length is a number
+        name: string; // ok, name is a string
+    }
+
+
+    interface ReadonlyStringArray {
+        readonly [index: number]: string;
+      }
+       
+    let myArray: ReadonlyStringArray = ["Alice", "Bob"];
+    myArray[2] = "Mallory"; // error!
+
+
+//     Indexable Types with Template Strings
+
+// A template string can be used to indicate that a particular pattern is allowed, but not all. For example, a HTTP headers object may have a set list of known headers and support any custom defined properties which are prefixed with x-.
+
+    interface HeadersResponse {
+        "content-type": string,
+        date: string,
+        "content-length": string
+        
+        // Permit any property starting with 'x-'.
+        [headerName: `x-${string}`]: string;
+    }
+    
+    function handleResponse(r: HeadersResponse) {
+        // Handle known, and x- prefixed
+        const type = r["content-type"]
+        const poweredBy = r["x-powered-by"]
+        
+        // Unknown keys without the prefix raise errors
+        const origin = r.origin
+        // Property 'origin' does not exist on type 'HeadersResponse'.
+    }
+
+    // Class Types
+    // Implementing an interface
+
+    // One of the most common uses of interfaces in languages like C# and Java, that of explicitly enforcing that a class meets a particular contract, is also possible in TypeScript.
+
+    // interface ClockInterface {
+    //     currentTime: Date;
+    //     setTime(d: Date): void;
+    //   }
+       
+    // class Clock implements ClockInterface {
+    //     currentTime: Date = new Date();
+    //     setTime(d: Date) {
+    //         this.currentTime = d;
+    //     }
+    //     constructor(h: number, m: number) {}
+    // }
+
+
+    // interface ClockConstructor {
+    //     new (hour: number, minute: number);
+    // }
+       
+    // // class Clock implements ClockConstructor {
+    // //     // Class 'Clock' incorrectly implements interface 'ClockConstructor'.
+    // //     // Type 'Clock' provides no match for the signature 'new (hour: number, minute: number): any'.
+        
+    // //     currentTime: Date;
+    // //     constructor(h: number, m: number) {}
+    // // }
+
+    // interface ClockConstructor {
+    //     new (hour: number, minute: number): ClockInterface;
+    //   }
+       
+    //   interface ClockInterface {
+    //     tick(): void;
+    //   }
+       
+    //   function createClock(
+    //     ctor: ClockConstructor,
+    //     hour: number,
+    //     minute: number
+    //   ): ClockInterface {
+    //     return new ctor(hour, minute);
+    //   }
+       
+    //   class DigitalClock implements ClockInterface {
+    //     constructor(h: number, m: number) {}
+    //     tick() {
+    //       console.log("beep beep");
+    //     }
+    //   }
+       
+    //   class AnalogClock implements ClockInterface {
+    //     constructor(h: number, m: number) {}
+    //     tick() {
+    //       console.log("tick tock");
+    //     }
+    //   }
+       
+    //   let digital = createClock(DigitalClock, 12, 17);
+    //   let analog = createClock(AnalogClock, 7, 32);
+
+
+    //EXPRESSIONS
+    interface ClockConstructor {
+        new (hour: number, minute: number): ClockInterface;
+    }
+    
+    interface ClockInterface {
+        tick(): void;
+    }
+    
+    const Clock: ClockConstructor = class Clock implements ClockInterface {
+        constructor(h: number, m: number) {}
+        tick() {
+            console.log("beep beep");
+        }
+    };
+    
+    let clock = new Clock(12, 17);
+    clock.tick()
+
+    // extending interfaces..sigue
+    // https://www.typescriptlang.org/docs/handbook/interfaces.html
